@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSS Ventas Walmart | Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--wine:#6b1233;--wine2:#8f1d45;--rose:#e8a0b8;--blush:#f7d5e0;--bg:#fbeff3;--ink:#2a1019;--mut:#8a6471;--card:rgba(255,255,255,.72);--line:rgba(107,18,51,.10)}
+*{box-sizing:border-box;margin:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);background:radial-gradient(1100px 600px at 10% -10%,#f9d3e0 0,transparent 60%),radial-gradient(900px 500px at 100% 0,#efc2d2 0,transparent 55%),var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 48px}
+nav{position:sticky;top:0;z-index:10;backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);background:rgba(251,239,243,.72);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:52px;padding-bottom:0}
+nav b{font-weight:600;letter-spacing:-.01em;color:var(--wine)}nav span{font-size:13px;color:var(--mut)}
+header{padding:44px 0 24px}
+header small{color:var(--wine2);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.03em;line-height:1.05;margin:8px 0 10px;font-weight:700;color:var(--wine)}
+header p{color:var(--mut);max-width:620px;font-size:17px;line-height:1.45}
+.filters{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0 22px}
+.filters label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:5px;font-weight:500}
+select{appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;color:var(--wine);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b1233' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid var(--line);border-radius:12px;padding:10px 38px 10px 14px;min-width:160px;box-shadow:0 1px 2px rgba(107,18,51,.06)}
+select:focus{outline:2px solid var(--rose)}
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(4,1fr);margin-bottom:16px}
+.card{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.8);border-radius:24px;padding:22px;box-shadow:0 8px 30px rgba(107,18,51,.07)}
+.kpi .l{font-size:13px;color:var(--mut);font-weight:500}
+.kpi .v{font-size:clamp(24px,3vw,34px);font-weight:700;letter-spacing:-.02em;margin-top:6px;color:var(--wine)}
+.kpi:first-child{background:linear-gradient(135deg,var(--wine) 0,var(--wine2) 100%)}
+.kpi:first-child .l{color:var(--blush)}.kpi:first-child .v{color:#fff}
+.kpi .s{font-size:12px;color:var(--mut);margin-top:4px}.kpi:first-child .s{color:var(--blush)}
+.row{grid-template-columns:repeat(12,1fr)}
+.c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
+h2{font-size:18px;letter-spacing:-.01em;font-weight:600;color:var(--wine)}
+.sub{font-size:13px;color:var(--mut);margin:3px 0 14px;line-height:1.4}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;background:rgba(107,18,51,.07);border-radius:10px;padding:3px}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--wine);padding:6px 12px;border-radius:8px;cursor:pointer}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(107,18,51,.18);font-weight:600}
+.ch{position:relative;height:300px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--mut);font-weight:500;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:9px 8px;border-bottom:1px solid var(--line)}tr:last-child td{border:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;min-width:26px;text-align:center;background:var(--blush);color:var(--wine);border-radius:99px;padding:2px 8px;font-weight:600;font-size:12px}
+.bar{height:6px;border-radius:9px;background:var(--blush);overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--wine2))}
+.insight{font-size:13px;color:var(--wine);background:var(--blush);border-radius:14px;padding:10px 14px;margin-top:12px;line-height:1.45}
+footer{text-align:center;color:var(--mut);font-size:12px;margin-top:30px;line-height:1.6}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
+@media(max-width:520px){.wrap{padding:0 14px 40px}.card{padding:16px;border-radius:20px}.filters label,select{width:100%}.filters label{flex:1 1 100%}.ch{height:260px}header{padding-top:30px}}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><b>● DSS Ventas</b><span id="periodo"></span></div></nav>
+<div class="wrap">
+<header>
+<small>Sistema de Soporte a Decisiones</small>
+<h1>Ventas de Walmart,<br>claras en minutos.</h1>
+<p>45 tiendas, 143 semanas. Explora el desempeño por tienda, las semanas festivas y los factores externos que se relacionan con las ventas.</p>
+</header>
+
+<div class="filters">
+<label>Tienda<select id="fStore"></select></label>
+<label>Año<select id="fYear"><option value="all">Todos los años</option><option>2010</option><option>2011</option><option>2012</option></select></label>
+<label>Tipo de semana<select id="fHol"><option value="all">Todas</option><option value="1">Solo festivas</option><option value="0">Solo no festivas</option></select></label>
+</div>
+
+<div class="grid kpis">
+<div class="card kpi"><div class="l">Ventas totales</div><div class="v" id="k1">–</div><div class="s" id="k1s"></div></div>
+<div class="card kpi"><div class="l">Venta semanal promedio</div><div class="v" id="k2">–</div><div class="s">por tienda y semana</div></div>
+<div class="card kpi"><div class="l">Tienda líder</div><div class="v" id="k3">–</div><div class="s" id="k3s"></div></div>
+<div class="card kpi"><div class="l">Impulso en semanas festivas</div><div class="v" id="k4">–</div><div class="s">vs. semanas normales</div></div>
+</div>
+
+<div class="grid row">
+<div class="card c8">
+<div class="head"><div><h2>Evolución de las ventas</h2><div class="sub">Ventas totales a lo largo del tiempo</div></div>
+<div class="seg" id="gran"><button data-g="w" class="on">Semanal</button><button data-g="m">Mensual</button></div></div>
+<div class="ch"><canvas id="cLine"></canvas></div>
+<div class="insight" id="i1"></div>
+</div>
+<div class="card c4">
+<h2>Festivas vs. no festivas</h2><div class="sub">Venta promedio por tienda y semana</div>
+<div class="ch"><canvas id="cHol"></canvas></div>
+<div class="insight" id="i2"></div>
+</div>
+
+<div class="card c12">
+<h2>Ventas totales por tienda</h2><div class="sub">Las 5 tiendas con más ventas aparecen en vino; el resto en rosa</div>
+<div class="ch"><canvas id="cStore"></canvas></div>
+<div class="insight" id="i3"></div>
+</div>
+
+<div class="card c6">
+<h2>Estacionalidad mensual</h2><div class="sub">Venta promedio por tienda y semana, según el mes</div>
+<div class="ch"><canvas id="cMonth"></canvas></div>
+</div>
+<div class="card c6">
+<div class="head"><div><h2>Ventas y factores externos</h2><div class="sub">Cada punto es una tienda (promedio)</div></div>
+<select id="fVar" style="min-width:150px;padding:8px 34px 8px 12px;font-size:14px"><option value="unemp">Desempleo (%)</option><option value="temp">Temperatura (°F)</option><option value="fuel">Combustible (USD/gal)</option><option value="cpi">CPI</option></select></div>
+<div class="ch"><canvas id="cSc"></canvas></div>
+<div class="insight" id="i4"></div>
+</div>
+
+<div class="card c12">
+<h2>Ranking de tiendas</h2><div class="sub">Top 10 según los filtros seleccionados</div>
+<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Tienda</th><th class="n">Ventas totales</th><th class="n">Prom. semanal</th><th style="min-width:120px">Participación</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+</div>
+<footer>Fuente: Walmart Sales Forecast (Kaggle) · Periodo feb 2010 – oct 2012<br>Nota: 2010 inicia en febrero y 2012 termina en octubre, por lo que los totales anuales no son comparables entre sí.</footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const WINE='#6b1233',WINE2='#8f1d45',ROSE='#e8a0b8',BLUSH='#f7d5e0';
+const M=n=>'$'+(n>=1e9?(n/1e9).toFixed(2)+' mil M':n>=1e6?(n/1e6).toFixed(1)+' M':Math.round(n).toLocaleString('es-MX'));
+const MM=n=>'$'+Math.round(n).toLocaleString('es-MX');
+const MES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",sans-serif';
+Chart.defaults.color='#8a6471';
+const grid={color:'rgba(107,18,51,.08)'};
+let ALL=[],gran='w',charts={};
+const VAR={unemp:'Desempleo (%)',temp:'Temperatura (°F)',fuel:'Combustible (USD/gal)',cpi:'CPI'};
+
+fetch('data/ventas.json').then(r=>r.json()).then(d=>{
+  ALL=d.rows.map(r=>({store:r[0],date:r[1],y:+r[1].slice(0,4),m:+r[1].slice(5,7)-1,sales:r[2],hol:r[3],temp:r[4],fuel:r[5],cpi:r[6],unemp:r[7]}));
+  let o='<option value="all">Todas las tiendas</option>';for(let i=1;i<=45;i++)o+=`<option value="${i}">Tienda ${i}</option>`;
+  $('fStore').innerHTML=o;
+  ['fStore','fYear','fHol','fVar'].forEach(i=>$(i).addEventListener('change',render));
+  document.querySelectorAll('#gran button').forEach(b=>b.onclick=()=>{gran=b.dataset.g;document.querySelectorAll('#gran button').forEach(x=>x.classList.toggle('on',x===b));render()});
+  render();
+}).catch(()=>{document.body.insertAdjacentHTML('afterbegin','<p style="padding:20px">No se pudo cargar data/ventas.json. Si abres el archivo localmente, usa un servidor (por ejemplo: python -m http.server).</p>')});
+
+const sum=a=>a.reduce((s,x)=>s+x,0), avg=a=>a.length?sum(a)/a.length:0;
+function group(rows,key,f){const g={};rows.forEach(r=>{(g[key(r)]??=[]).push(f(r))});return g}
+function corr(x,y){const n=x.length,mx=avg(x),my=avg(y);let a=0,b=0,c=0;for(let i=0;i<n;i++){a+=(x[i]-mx)*(y[i]-my);b+=(x[i]-mx)**2;c+=(y[i]-my)**2}return a/Math.sqrt(b*c)}
+function draw(id,cfg){charts[id]?.destroy();charts[id]=new Chart($(id),cfg)}
+
+function render(){
+  const st=$('fStore').value,yr=$('fYear').value,ho=$('fHol').value,vr=$('fVar').value;
+  const base=ALL.filter(r=>(st==='all'||r.store==st)&&(yr==='all'||r.y==yr));
+  const rows=base.filter(r=>ho==='all'||r.hol==ho);
+  if(!rows.length)return;
+  const total=sum(rows.map(r=>r.sales));
+  $('periodo').textContent=(yr==='all'?'2010–2012':yr)+' · '+(st==='all'?'45 tiendas':'Tienda '+st);
+
+  // Ranking de tiendas (ignora filtro de tienda para comparar)
+  const rk=ALL.filter(r=>(yr==='all'||r.y==yr)&&(ho==='all'||r.hol==ho));
+  const byS=group(rk,r=>r.store,r=>r.sales);
+  const rank=Object.entries(byS).map(([s,a])=>({s:+s,t:sum(a),a:avg(a)})).sort((a,b)=>b.t-a.t);
+  const totRk=sum(rank.map(x=>x.t));
+  const lead=rank[0];
+
+  // KPIs
+  $('k1').textContent=M(total);$('k1s').textContent=rows.length.toLocaleString('es-MX')+' registros tienda-semana';
+  $('k2').textContent=MM(avg(rows.map(r=>r.sales)));
+  if(st==='all'){$('k3').textContent='Tienda '+lead.s;$('k3s').textContent=M(lead.t)+' · '+(lead.t/totRk*100).toFixed(1)+'% del total'}
+  else{const pos=rank.findIndex(x=>x.s==st)+1;$('k3').textContent='Lugar '+pos+' de 45';$('k3s').textContent='Líder: Tienda '+lead.s}
+  const hb=base.filter(r=>r.hol==1),nb=base.filter(r=>r.hol==0);
+  const lift=hb.length&&nb.length?avg(hb.map(r=>r.sales))/avg(nb.map(r=>r.sales))-1:null;
+  $('k4').textContent=lift===null?'–':(lift>=0?'+':'')+(lift*100).toFixed(1)+'%';
+
+  // 1) Línea
+  const keyF=gran==='w'?r=>r.date:r=>r.date.slice(0,7);
+  const gl=group(rows,keyF,r=>r.sales);const lk=Object.keys(gl).sort();
+  const lv=lk.map(k=>sum(gl[k]));
+  const lab=lk.map(k=>gran==='w'?k.slice(2).split('-').reverse().join('/'):MES[+k.slice(5)-1]+' '+k.slice(2,4));
+  draw('cLine',{type:'line',data:{labels:lab,datasets:[{data:lv,borderColor:WINE2,borderWidth:2.5,pointRadius:0,pointHoverRadius:5,tension:.3,fill:true,backgroundColor:c=>{const g=c.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(232,160,184,.55)');g.addColorStop(1,'rgba(232,160,184,0)');return g}}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{intersect:false,mode:'index'},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>MM(c.parsed.y)}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:7,maxRotation:0}},y:{grid,ticks:{callback:v=>M(v)}}}}});
+  const pk=lv.indexOf(Math.max(...lv));
+  $('i1').textContent='Pico de ventas: '+lab[pk]+' ('+M(lv[pk])+'). Las semanas de fin de año concentran los máximos, por lo que conviene reforzar inventario y personal desde noviembre.';
+
+  // 2) Festivas vs no festivas
+  const ha=hb.length?avg(hb.map(r=>r.sales)):0,na=nb.length?avg(nb.map(r=>r.sales)):0;
+  draw('cHol',{type:'bar',data:{labels:['No festiva','Festiva'],datasets:[{data:[na,ha],backgroundColor:[ROSE,WINE],borderRadius:12,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>MM(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{grid,beginAtZero:true,ticks:{callback:v=>M(v)}}}}});
+  $('i2').textContent=lift===null?'Sin datos para esta combinación.':'Las semanas festivas venden '+(lift*100).toFixed(1)+'% más por tienda en promedio. El efecto se concentra en Acción de Gracias.';
+
+  // 3) Por tienda
+  draw('cStore',{type:'bar',data:{labels:rank.map(x=>x.s),datasets:[{data:rank.map(x=>x.t),backgroundColor:rank.map((x,i)=>x.s==st?'#2a1019':i<5?WINE:ROSE),borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>'Tienda '+c[0].label,label:c=>MM(c.parsed.y)}}},scales:{x:{grid:{display:false},title:{display:true,text:'Número de tienda'}},y:{grid,ticks:{callback:v=>M(v)}}}}});
+  const top5=sum(rank.slice(0,5).map(x=>x.t))/totRk*100,bot5=sum(rank.slice(-5).map(x=>x.t))/totRk*100;
+  $('i3').textContent='Las 5 tiendas líderes concentran '+top5.toFixed(1)+'% de las ventas; las 5 con menor venta, solo '+bot5.toFixed(1)+'%. Una afectación en las primeras tendría un impacto desproporcionado.'+(st!=='all'?' La tienda seleccionada se muestra en oscuro.':'');
+
+  // 4) Mensual
+  const gm=group(rows,r=>r.m,r=>r.sales);
+  draw('cMonth',{type:'bar',data:{labels:MES,datasets:[{data:MES.map((_,i)=>gm[i]?avg(gm[i]):0),backgroundColor:MES.map((_,i)=>i>=10?WINE:BLUSH),borderColor:ROSE,borderWidth:1,borderRadius:8,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>MM(c.parsed.y)}}},scales:{x:{grid:{display:false}},y:{grid,beginAtZero:true,ticks:{callback:v=>M(v)}}}}});
+
+  // 5) Dispersión (promedio por tienda)
+  const gs=group(rk,r=>r.store,r=>r);
+  const pts=Object.entries(gs).map(([s,a])=>({x:avg(a.map(r=>r[vr])),y:avg(a.map(r=>r.sales)),s}));
+  const r=corr(pts.map(p=>p.x),pts.map(p=>p.y));
+  draw('cSc',{type:'scatter',data:{datasets:[{data:pts,backgroundColor:pts.map(p=>p.s==st?'#2a1019':'rgba(143,29,69,.65)'),pointRadius:6,pointHoverRadius:8}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Tienda '+c.raw.s+': '+MM(c.raw.y)}}},scales:{x:{grid,title:{display:true,text:VAR[vr]}},y:{grid,title:{display:true,text:'Venta semanal promedio'},ticks:{callback:v=>M(v)}}}}});
+  const fuerza=Math.abs(r)<.2?'muy débil':Math.abs(r)<.4?'débil':Math.abs(r)<.6?'moderada':'fuerte';
+  $('i4').textContent='Correlación entre tiendas: r = '+r.toFixed(2)+' ('+fuerza+', '+(r<0?'negativa':'positiva')+'). Correlación no implica causalidad: úsala como señal, no como explicación.';
+
+  // 6) Tabla
+  const t10=rank.slice(0,10),mx=t10[0].t;
+  $('tb').innerHTML=t10.map((x,i)=>`<tr><td><span class="pill">${i+1}</span></td><td>Tienda ${x.s}</td><td class="n">${MM(x.t)}</td><td class="n">${MM(x.a)}</td><td>${(x.t/totRk*100).toFixed(1)}%<div class="bar"><i style="width:${x.t/mx*100}%"></i></div></td></tr>`).join('');
+}
+</script>
+</body>
+</html>
